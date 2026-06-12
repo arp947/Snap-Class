@@ -113,7 +113,7 @@ def student_dashboard():
     with c1:
         st.header('Your Enrolled Subjects')
     with c2:
-        if st.button('Enroll in subject', type='primary', width='stretch') :
+        if st.button('Enroll in subject', type='primary', width='stretch'):
             enroll_dialog()
 
     st.divider()
@@ -126,34 +126,31 @@ def student_dashboard():
 
     for log in logs:
         sid = log['subject_id']
-
         if sid not in stats_map:
             stats_map[sid] = {"total":0,"attended":0}
         stats_map[sid]['total'] += 1
-
         if log.get('is_present'):
-            stats_map[sid]['attended']  += 1
+            stats_map[sid]['attended'] += 1
 
     cols = st.columns(2)
     for i, sub_node in enumerate(subjects):
         sub = sub_node['subjects']
         sid = sub['subject_id']
 
-        stats = stats_map.get(sid, {"total" : 0,"attended":0})
+        stats = stats_map.get(sid, {"total": 0,"attended":0})
 
-        def unenroll_button():
-                if st.button("Unenroll from this course",type='tertiary',width='stretch',icon = ':material/delete_forever:'):
-                    unenroll_student_to_subject(student_id,sid)
-                    st.toast(f"Unenrolled from {sub['name']} successfully")
-                    st.rerun()
-        
+        def unenroll_button(s=sub, s_id=sid):
+            if st.button("Unenroll from this course", key=f"unenroll_{s_id}", type='tertiary', width='stretch', icon=':material/delete_forever:'):
+                unenroll_student_to_subject(student_id, s_id)
+                st.toast(f"Unenrolled from {s['name']} successfully")
+                st.rerun()
 
-        with cols[i% 2]:
+        with cols[i % 2]:
             subject_card(
-                name = sub['name'],
-                code = sub['subject_code'],
-                section = sub['section'],
-                stats = [
+                name=sub['name'],
+                code=sub['subject_code'],
+                section=sub['section'],
+                stats=[
                     ('📆','Total',stats['total']),
                     ('✅', 'Attended', stats['attended']),
                 ],
@@ -170,7 +167,7 @@ def student_screen():
     if "student_data" in st.session_state:
         student_dashboard()
         return
-    
+
     c1,c2 = st.columns(2,vertical_alignment='center',gap='xxlarge')
 
     with c1:
@@ -197,7 +194,7 @@ def student_screen():
         img = np.array(Image.open(photo_source))
 
         with st.spinner('AI is scanning...'):
-            detected, all_ids , num_faces = predict_attendance(img)
+            detected, all_ids, num_faces = predict_attendance(img)
 
             if num_faces == 0:
                 st.warning('Face not found!')
@@ -207,7 +204,7 @@ def student_screen():
                 if detected:
                     student_id = list(detected.keys())[0]
                     all_students = get_all_students()
-                    student = next((s for s in all_students if s['student_id'] == student_id),None) 
+                    student = next((s for s in all_students if s['student_id'] == student_id), None)
 
                     if student:
                         st.session_state.is_logged_in = True
@@ -243,8 +240,8 @@ def student_screen():
                             voice_emb = None
                             if audio_data:
                                 voice_emb = get_voice_embedding(audio_data.read())
-                            
-                            response_data = create_student(new_name, face_embedding= face_emb, voice_embedding=voice_emb)
+
+                            response_data = create_student(new_name, face_embedding=face_emb, voice_embedding=voice_emb)
 
                             if response_data:
                                 train_classifier()
@@ -256,9 +253,7 @@ def student_screen():
                                 st.rerun()
                         else:
                             st.error('Couldnt capture your facial features for registration')
-
                 else:
                     st.warning('Please enter your name!')
-
 
     footer_dashboard()
